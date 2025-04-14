@@ -12,7 +12,6 @@
             <div class="alert alert-warning">
                 🚧 You are currently a normal user. Admin features are not available.
             </div>
-            <a href="/make_admin" class="btn btn-danger">🚨 Exploit: Become Admin (VULNERABLE)</a>
         {% elif current_user.role == 'admin' %}
             <div class="alert alert-success">
                 ✅ You are an admin. You have full access.
