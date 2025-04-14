@@ -14,11 +14,11 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # Custom decorator to enforce role-based access
-def role_required(required_role):
+def role_required(*roles):
     def wrapper(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or current_user.role != required_role:
+            if not current_user.is_authenticated or current_user.role not in roles:
                 return abort(403)
             return f(*args, **kwargs)
         return decorated_function
@@ -28,7 +28,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
-    role = db.Column(db.String(10), default='user')
+    role = db.Column(db.String(20), default='user')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -49,12 +49,16 @@ def login():
         user = User.query.filter_by(username=username, password=password).first()
         if user:
             login_user(user)
-            session['username'] = user.username
             return redirect(url_for('dashboard'))
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    # Allow unrestricted registration only if no users exist (initial setup). After that, restrict to admin/superadmin.
+    user_count = User.query.count()
+    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin', 'superadmin']):
+        return abort(403)
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -67,7 +71,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
-    
+
     return render_template('register.html')
 
 @app.route('/dashboard')
