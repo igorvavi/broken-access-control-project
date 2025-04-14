@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Welcome to the Broken Access Control Demo</h2>
+    <p>Please <a href="{{ url_for('login') }}">login</a> to continue.</p>
+</div>
+{% endblock %}
