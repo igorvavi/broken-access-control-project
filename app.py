@@ -12,6 +12,20 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+from functools import wraps
+from flask import abort
+from flask_login import current_user
+
+def role_required(required_role):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated or current_user.role != required_role:
+                return abort(403)
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -110,6 +124,8 @@ def admin_panel():
         return render_template('admin.html', access_granted=True)
     else:
         return render_template('admin.html', access_granted=False)
+
+
 @app.route('/exploit')
 @login_required
 def exploit():
@@ -123,13 +139,14 @@ def execute_exploit():
         user.role = 'admin'
         db.session.commit()
     return redirect(url_for('dashboard'))
+    
 @app.route('/adminify_me_plz')
 @login_required
+@role_required('superadmin')  # Or whatever high-level role you decide
 def adminify():
-    if current_user.role != 'admin':
-        user = User.query.filter_by(id=current_user.id).first()
-        user.role = 'admin'
-        db.session.commit()
+    user = User.query.filter_by(id=current_user.id).first()
+    user.role = 'admin'
+    db.session.commit()
     return redirect(url_for('dashboard'))
 
 import os
