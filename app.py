@@ -70,30 +70,19 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        role = request.form.get('role', 'user')  # padrão: user
+        role = request.form.get('role', 'user')  # Default to 'user' if not specified
 
-        # Evitar duplicidade
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            return "User already exists!"
+            return "Username already exists."
 
         new_user = User(username=username, password=password, role=role)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
     
-    return '''
-        <h2>Register</h2>
-        <form method="POST">
-            Username: <input type="text" name="username" required><br>
-            Password: <input type="password" name="password" required><br>
-            Role: <select name="role">
-                    <option value="user">user</option>
-                    <option value="admin">admin</option>
-                  </select><br>
-            <input type="submit" value="Register">
-        </form>
-    '''
+    return render_template('register.html')
+
 
 @app.route('/dashboard')
 @login_required
