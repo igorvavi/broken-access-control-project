@@ -9,7 +9,7 @@ with app.app_context():
         print("User already exists.")
     else:
         role = input("Role (user/admin): ").strip().lower()
-        if role not in ['user', 'admin']:
+        if role not in ['user', 'admin', 'superadmin']:
             role = 'user'
         new_user = User(username=username, password=password, role=role)
         db.session.add(new_user)
