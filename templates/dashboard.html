@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Access Control{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h3 class="card-title">Welcome, {{ current_user.username }}!</h3>
+        <p class="mb-3">Your current role is: <strong>{{ current_user.role }}</strong></p>
+
+        {% if current_user.role == 'user' %}
+            <div class="alert alert-warning">
+                🚧 You are currently a normal user. Admin features are not available.
+            </div>
+            <a href="/make_admin" class="btn btn-danger">🚨 Exploit: Become Admin (VULNERABLE)</a>
+        {% elif current_user.role == 'admin' %}
+            <div class="alert alert-success">
+                ✅ You are an admin. You have full access.
+            </div>
+            <a href="/admin" class="btn btn-primary">Go to Admin Panel</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
