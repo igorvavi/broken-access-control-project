@@ -128,3 +128,13 @@ if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
 
+@app.route('/demote')
+@login_required
+def demote():
+    user = User.query.filter_by(id=current_user.id).first()
+    if user.role == 'admin':
+        user.role = 'user'
+        db.session.commit()
+        return "You have been demoted to a regular user."
+    return "You are already a regular user."
+
