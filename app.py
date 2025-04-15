@@ -13,7 +13,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Custom decorator to enforce role-based access
 def role_required(*roles):
     def wrapper(f):
         @wraps(f)
@@ -54,7 +53,6 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Allow unrestricted registration only if no users exist (initial setup). After that, restrict to admin/superadmin.
     user_count = User.query.count()
     if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin', 'superadmin']):
         return abort(403)
@@ -91,9 +89,9 @@ def admin_panel():
         return render_template('admin.html', access_granted=True)
     return render_template('admin.html', access_granted=False)
 
+# 🔓 Vulnerability: Any logged-in user can escalate to admin
 @app.route('/adminify_me_plz')
 @login_required
-@role_required('superadmin')
 def adminify():
     user = User.query.filter_by(id=current_user.id).first()
     user.role = 'admin'
