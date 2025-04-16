@@ -92,6 +92,7 @@ def admin_panel():
 # Vulnerability: Any logged-in user can escalate to admin
 @app.route('/adminify_me_plz')
 @login_required
+@role_required('superadmin')
 def adminify():
     user = User.query.filter_by(id=current_user.id).first()
     user.role = 'admin'
