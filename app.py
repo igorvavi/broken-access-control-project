@@ -100,6 +100,16 @@ def adminify():
     db.session.commit()
     return redirect(url_for('dashboard'))
 
+@app.route('/seed-users', methods=['GET', 'POST'])
+def seeder():
+    new_user = User(username="bob", password="p@ssword", role="user")
+    new_user_admin = User(username="alice", password="p@ssword", role="admin")
+    db.session.add(new_user)
+    db.session.add(new_user_admin)
+    db.session.commit()
+    
+    return redirect(url_for('login'))
+
 @app.route('/demote')
 @login_required
 def demote():
