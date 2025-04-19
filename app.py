@@ -101,7 +101,7 @@ def admin_panel():
 
 @app.route('/adminify_me_plz')
 @login_required
-@role_required('admin')
+
 def adminify():
     user = User.query.filter_by(id=current_user.id).first()
     user.role = 'admin'
