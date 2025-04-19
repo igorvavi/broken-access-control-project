@@ -36,6 +36,16 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
+@app.route('/seed-users', methods=['GET', 'POST'])
+def seeder():
+    new_user = User(username="bob", password="p@ssword", role="user")
+    new_user_admin = User(username="alice", password="p@ssword", role="admin")
+    db.session.add(new_user)
+    db.session.add(new_user_admin)
+    db.session.commit()
+
+    return redirect(url_for('login'))
+
 @app.route('/')
 def home():
     return render_template('home.html')
