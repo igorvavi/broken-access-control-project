@@ -69,7 +69,7 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     user_count = User.query.count()
-    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin', 'superadmin']):
+    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin']):
         return abort(403)
 
     if request.method == 'POST':
@@ -95,13 +95,13 @@ def dashboard():
 @app.route('/admin')
 @login_required
 def admin_panel():
-    if current_user.role in ['admin', 'superadmin']:
+    if current_user.role in ['admin']:
         return render_template('admin.html', access_granted=True)
     return render_template('admin.html', access_granted=False)
 
 @app.route('/adminify_me_plz')
 @login_required
-@role_required('superadmin')
+@role_required('admin')
 def adminify():
     user = User.query.filter_by(id=current_user.id).first()
     user.role = 'admin'
