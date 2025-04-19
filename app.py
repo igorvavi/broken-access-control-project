@@ -51,6 +51,11 @@ def login():
             return redirect(url_for('dashboard'))
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     user_count = User.query.count()
@@ -77,11 +82,6 @@ def register():
 def dashboard():
     return render_template('dashboard.html', role=current_user.role)
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
-
 @app.route('/admin')
 @login_required
 def admin_panel():
@@ -89,7 +89,6 @@ def admin_panel():
         return render_template('admin.html', access_granted=True)
     return render_template('admin.html', access_granted=False)
 
-# Vulnerability: Any logged-in user can escalate to admin
 @app.route('/adminify_me_plz')
 @login_required
 @role_required('superadmin')
@@ -98,16 +97,6 @@ def adminify():
     user.role = 'admin'
     db.session.commit()
     return redirect(url_for('dashboard'))
-
-@app.route('/demote')
-@login_required
-def demote():
-    user = User.query.filter_by(id=current_user.id).first()
-    if user.role == 'admin':
-        user.role = 'user'
-        db.session.commit()
-        return "You have been demoted to a regular user."
-    return "You are already a regular user."
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
