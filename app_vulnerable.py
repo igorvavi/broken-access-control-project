@@ -36,6 +36,16 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
+@app.route('/seed-users', methods=['GET', 'POST'])
+def seeder():
+    new_user = User(username="bob", password="p@ssword", role="user")
+    new_user_admin = User(username="alice", password="p@ssword", role="admin")
+    db.session.add(new_user)
+    db.session.add(new_user_admin)
+    db.session.commit()
+
+    return redirect(url_for('login'))
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -51,10 +61,15 @@ def login():
             return redirect(url_for('dashboard'))
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     user_count = User.query.count()
-    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin', 'superadmin']):
+    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin']):
         return abort(403)
 
     if request.method == 'POST':
@@ -77,36 +92,21 @@ def register():
 def dashboard():
     return render_template('dashboard.html', role=current_user.role)
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
-
 @app.route('/admin')
 @login_required
 def admin_panel():
-    if current_user.role in ['admin', 'superadmin']:
+    if current_user.role in ['admin']:
         return render_template('admin.html', access_granted=True)
     return render_template('admin.html', access_granted=False)
 
-# 🔓 Vulnerability: Any logged-in user can escalate to admin
 @app.route('/adminify_me_plz')
 @login_required
+
 def adminify():
     user = User.query.filter_by(id=current_user.id).first()
     user.role = 'admin'
     db.session.commit()
     return redirect(url_for('dashboard'))
-
-@app.route('/demote')
-@login_required
-def demote():
-    user = User.query.filter_by(id=current_user.id).first()
-    if user.role == 'admin':
-        user.role = 'user'
-        db.session.commit()
-        return "You have been demoted to a regular user."
-    return "You are already a regular user."
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
