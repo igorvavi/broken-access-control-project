@@ -89,7 +89,7 @@ def admin_panel():
         return render_template('admin.html', access_granted=True)
     return render_template('admin.html', access_granted=False)
 
-# Vulnerability: Any logged-in user can escalate to admin
+# Vulnerability: This route does not call the decorator "role_required" so any LOGGED-IN user can escalate to admin
 @app.route('/adminify_me_plz')
 @login_required
 def adminify():
