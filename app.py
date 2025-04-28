@@ -54,7 +54,7 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     user_count = User.query.count()
-    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin', 'superadmin']):
+    if user_count > 0 and (not current_user.is_authenticated or current_user.role not in ['admin']):
         return abort(403)
 
     if request.method == 'POST':
